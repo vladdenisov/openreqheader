@@ -42,9 +42,13 @@
   });
 
   $: exportedText = JSON.stringify(selectedProfiles);
-  $: exportedUrl = `https://modheader.com/p/${lzString.compressToEncodedURIComponent(
-    exportedText
-  )}`;
+  // Disconnected from modheader.com: that domain belonged to the original project,
+  // whose later builds shipped spyware (see README). URL-share is inert until this
+  // fork hosts its own decode page — use the JSON tab to export/import instead.
+  // $: exportedUrl = `https://modheader.com/p/${lzString.compressToEncodedURIComponent(
+  //   exportedText
+  // )}`;
+  $: exportedUrl = '';
 </script>
 
 <Dialog

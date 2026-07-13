@@ -1,38 +1,26 @@
-# ModHeader browser extension
+# OpenReqHeader browser extension
 
 <h3 align="center">
-  ModHeader is a browser extension that allow you to modify HTTP request and response headers.
+  OpenReqHeader is a browser extension that allow you to modify HTTP request and response headers.
 </h3>
-<h3 align="center">
-  <a href="https://modheader.com/">
-    <img src="https://static.modheader.com/logo_2x.png" width="24px" alt="ModHeader" /> ModHeader official website
-  </a>
-</h3>
-<p align="center">
-  <a href="https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj">
-    <img src="https://static.modheader.com/chrome.svg" width="48">
-  </a>
-  <a href="https://addons.mozilla.org/firefox/addon/modheader-firefox/">
-    <img src="https://static.modheader.com/firefox_1x.png" srcset="https://static.modheader.com/firefox_2x.png 2x" width="48">
-  </a>
-  <a href="https://addons.opera.com/en/extensions/details/modheader/">
-    <img src="https://static.modheader.com/opera.png" srcset="https://static.modheader.com/opera_2x.png 2x" width="48">
-  </a>
-  <a href="https://microsoftedge.microsoft.com/addons/detail/opgbiafapkbbnbnjcdomjaghbckfkglc">
-    <img src="https://static.modheader.com/edge.svg" width="48">
-  </a>
-  
-</p>
 
-## Stats
+## About this fork
 
-<a href="https://chrome-stats.com/d/idgpnmonknjnojddfkpgkljpfnnfcklj">ModHeader stats</a>
+This is a fork of ModHeader, taken from the codebase before v4 changed the license. It is maintained separately from the official ModHeader project and its store listings.
 
-## Donation
+**Why this fork exists:** later official builds (Chrome ID `idgpnmonknjnojddfkpgkljpfnnfcklj`, same payload on the Edge listing) shipped a hidden spyware module disguised inside a fake `dayjs` bundle. It fingerprinted the browser, harvested the domain of every site visited, AES-GCM-encrypted the list, and uploaded it daily to a third-party endpoint (`api.stanfordstudies.com`) unrelated to ModHeader. The collector shipped behind a kill switch (an empty allowlist) so it could be silently flipped on in a future auto-update without any code review catching it beforehand. On top of that, the official build force-opened an ad/affiliate tab on every extension update — including on managed enterprise machines — and served in-app ads with a pay-to-remove upsell. Chrome Web Store pulled the listing on 2026-07-09 for malware; Edge pulled its copy shortly after.
 
-If you find ModHeader useful, please consider making a donation. If you use it for your company project, please ask your company to make a monthly donation!
+This fork predates all of that. It does not contain the spyware SDK, the ad-tab code, or any telemetry/exfiltration path. Development here continues independently under the original AGPLv3 license.
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/pools/c/84aPpFIA0Z)
+**Is it OK to fork?** Yes. The code is licensed under the [GNU AGPLv3](LICENSE), a copyleft license that explicitly permits copying, modifying, and redistributing the software (including for commercial use), as long as source code stays available under the same license — including for network-accessible (SaaS) use. No permission from the original author is required.
+
+## Manifest V3
+
+This fork runs on Manifest V3 (Chrome dropped Manifest V2 support). Header/URL modification is implemented with `declarativeNetRequest` session rules (see `src/js/dnr-rules.js`) instead of blocking `webRequest`, which MV3 no longer allows. This carries real capability gaps versus the old engine:
+
+- **No more per-request dynamic header values.** The old `function({url, oldValue}) {...}` header value (evaluated via `eval()` on every request) is unsupported — MV3's CSP forbids `eval` in the service worker, and DNR rules are static/precomputed anyway. Such a value is now dropped (treated as empty) with a console warning. Plain static values are unaffected.
+- **A profile's global URL filters can't be combined with a redirect's own regex.** DNR only supports one `regexFilter` per rule, so a `urlReplacements` entry is scoped by its own pattern only, not intersected with the profile's separate `urlFilters`/`excludeUrlFilters`. Fold any extra scoping directly into the redirect's regex.
+- **Raw append mode** (no separator) is approximated with DNR's native `append` operation, which always comma-separates — same as `comma` mode now.
 
 ## Features
 
@@ -47,24 +35,41 @@ If you find ModHeader useful, please consider making a donation. If you use it f
 - Cloud backup
 - Tab locking!
 
-## Screenshots
+## Contribution
 
-<img src="https://static.modheader.com/screenshots/screenshot-caption-1.png">
-<img src="https://static.modheader.com/screenshots/screenshot-caption-2.png">
-<img src="https://static.modheader.com/screenshots/screenshot-caption-3.png">
-<img src="https://static.modheader.com/screenshots/screenshot-caption-4.png">
-<img src="https://static.modheader.com/screenshots/screenshot-caption-5.png">
+Pull requests welcome. Maintainers reserve the right to reject PRs that don't fit the project or add too much complexity for too little benefit.
 
-## Forking and contribution
+This project is licensed under [AGPLv3](LICENSE) — fork, modify, redistribute, or use it commercially, as long as source stays available under the same license. Just don't impersonate the official ModHeader brand/listings.
 
-Feel free to send pull requests to add new features to ModHeader. It will benefit everyone! That said, I reserve the rights to reject pull requests that does not seem useful, or if they add too much complexity for very little benefits.
+## Development
 
-You may fork and redistribute ModHeader for a small group of friends / colleagues, but please do not impersonate ModHeader, or try to sell it for a profit. If you use ModHeader in any commercial product, please let me know.
+Requires Node.js (Node 18+ recommended) and npm.
 
-## Installation
+```sh
+npm install       # install deps, also compiles SMUI theme CSS via postinstall
+npm run start     # watch build for Chrome, output in dist/
+npm run start-firefox  # watch build for Firefox, output in dist/
+```
 
-Run `npm install` first, then run `npm run start` to start development. The built packages will be in the build/ directory.
+Load the extension unpacked while developing:
 
-## Selenium usage
+- Chrome: go to `chrome://extensions`, enable Developer mode, click "Load unpacked", select the `dist/` folder.
+- Firefox: go to `about:debugging#/runtime/this-firefox`, click "Load Temporary Add-on", select any file inside `dist/`.
 
-If you need to use ModHeader for Selenium tests, please visit: [modheader_selenium](https://github.com/bewisse/modheader_selenium)
+`npm run start` watches source files and rebuilds automatically; reload the extension in the browser to pick up changes.
+
+### Building
+
+```sh
+npm run build   # production build for Chrome, output in dist/
+```
+
+> Note: `build-firefox`/`build-opera`/`build-edge`/`build-all` scripts currently reference a deleted `utils/build.js` and are broken as of this writing.
+
+### Testing
+
+Unit tests use Jest and cover `src/js/`:
+
+```sh
+npm run test
+```

@@ -3,7 +3,7 @@ import { setLockedTabId, setPaused } from './storage-loader.js';
 
 const PAUSE_MENU_ID = 'pause';
 const LOCK_MENU_ID = 'lock';
-const BROWSER_ACTION_CONTEXT = ['browser_action'];
+const BROWSER_ACTION_CONTEXT = ['action'];
 
 const currentSettings = {};
 
@@ -42,12 +42,12 @@ async function updateContextMenuIfNeeded(id, { title, onclick }) {
 export async function resetContextMenu(chromeLocal) {
   if (chromeLocal.isPaused) {
     await updateContextMenuIfNeeded(PAUSE_MENU_ID, {
-      title: 'Unpause ModHeader',
+      title: 'Unpause OpenReqHeader',
       onclick: () => setPaused(false)
     });
   } else {
     await updateContextMenuIfNeeded(PAUSE_MENU_ID, {
-      title: 'Pause ModHeader',
+      title: 'Pause OpenReqHeader',
       onclick: () => setPaused(true)
     });
   }

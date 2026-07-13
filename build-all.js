@@ -3,7 +3,6 @@ const child_process = require("child_process");
 const archiver = require("archiver");
 
 const PLATFORMS = ["chrome", "firefox", "edge", "opera"];
-const GIT_URL = "https://github.com/bewisse/modheader.git";
 
 function zipDirectory(source, destFile) {
   const output = fs.createWriteStream(destFile);
@@ -30,7 +29,3 @@ for (const platform of PLATFORMS) {
   fs.copySync("build", `dist/${platform}/`);
   zipDirectory(`dist/${platform}/`, `dist/${platform}.zip`);
 }
-
-child_process.execSync(`git clone ${GIT_URL} dist/master`);
-fs.emptyDirSync("dist/master/.git");
-zipDirectory("dist/master", "dist/master.zip");

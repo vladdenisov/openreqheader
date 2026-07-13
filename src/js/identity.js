@@ -25,7 +25,13 @@ export async function loadSignedInUser() {
   }
 }
 
+// Disconnected from modheader.com: that domain belonged to the original project,
+// whose later builds shipped spyware (see README). Sign-in/upgrade are inert
+// (no-op) until this fork has its own account backend at process.env.URL_BASE.
 export async function signIn() {
+  if (!process.env.URL_BASE) {
+    return;
+  }
   const url = new URL(`${process.env.URL_BASE}/login`);
   url.searchParams.set('for', CURRENT_BROWSER);
   url.searchParams.set('extension_id', chrome.runtime.id);
@@ -35,6 +41,9 @@ export async function signIn() {
 }
 
 export async function upgrade() {
+  if (!process.env.URL_BASE) {
+    return;
+  }
   const url = new URL(`${process.env.URL_BASE}/login`);
   url.searchParams.set('for', CURRENT_BROWSER);
   url.searchParams.set('extension_id', chrome.runtime.id);

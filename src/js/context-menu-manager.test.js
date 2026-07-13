@@ -23,7 +23,7 @@ describe('context-menu-manager', () => {
     expect(mockContextMenu.updateContextMenu).toHaveBeenCalledWith(
       __testing__.PAUSE_MENU_ID,
       expect.objectContaining({
-        title: 'Pause ModHeader'
+        title: 'Pause OpenReqHeader'
       })
     );
   });
@@ -35,7 +35,7 @@ describe('context-menu-manager', () => {
     expect(mockContextMenu.updateContextMenu).toHaveBeenCalledWith(
       __testing__.PAUSE_MENU_ID,
       expect.objectContaining({
-        title: 'Unpause ModHeader'
+        title: 'Unpause OpenReqHeader'
       })
     );
   });

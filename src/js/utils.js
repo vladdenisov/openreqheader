@@ -50,3 +50,18 @@ export function evaluateValue({ value, url, oldValue }) {
   }
   return value;
 }
+
+// declarativeNetRequest rules are static and built ahead of time (no blocking
+// webRequest under MV3), so header/redirect values can no longer be evaluated
+// per-request. `function({url, oldValue}) {...}` values are unsupported here;
+// such a value is dropped (returned as '') instead of silently doing nothing.
+export function evaluateStaticValue(value) {
+  if (value && value.startsWith('function')) {
+    console.warn(
+      `Dynamic (function) header/redirect values are not supported: "${value}". ` +
+        'Use a plain static value instead.'
+    );
+    return '';
+  }
+  return value;
+}

@@ -8,7 +8,7 @@
   import TopBarPauseButton from './TopBarPauseButton.svelte';
   import TopBarTabLockButton from './TopBarTabLockButton.svelte';
   import TopBarMoreMenu from './TopBarMoreMenu.svelte';
-  import TopBarSignInButton from './TopBarSignInButton.svelte';
+  // import TopBarSignInButton from './TopBarSignInButton.svelte'; // see disabled usage below
   import ProfileBadgeDialog from './ProfileBadgeDialog.svelte';
   import MdiIcon from './MdiIcon.svelte';
   import { isPaused, isLocked, undo } from '../js/datasource.js';
@@ -85,14 +85,19 @@
       >
         <MdiIcon size="24" icon={mdiShare} color={$buttonColor} />
       </IconButton>
-      <TopBarSignInButton />
+      <!--
+        Sign-in disconnected from modheader.com: that domain belonged to the
+        original project, whose later builds shipped spyware (see README).
+        Re-enable once this fork has its own account backend.
+        <TopBarSignInButton />
+      -->
       <TopBarMoreMenu />
     </Section>
   </Row>
 </TopAppBar>
 
 <Snackbar timeoutMs={10000} bind:this={pauseSnackbar}>
-  <Label>ModHeader is Paused</Label>
+  <Label>OpenReqHeader is Paused</Label>
   <Actions>
     <Button on:click={() => isPaused.set(false)}>Resume</Button>
   </Actions>

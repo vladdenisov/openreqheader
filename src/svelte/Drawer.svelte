@@ -140,37 +140,41 @@
       </div>
 
       <Separator nav />
-      <Item
-        class="main-drawer-item"
-        title="Rate us"
-        on:click={() => openLink('https://modheader.com/review?browser=' + CURRENT_BROWSER)}
-      >
-        <span class="main-drawer-icon-container">
-          <MdiIcon
-            size="24"
-            class="main-drawer-icon"
-            icon={mdiThumbUpOutline}
-            color={PRIMARY_COLOR}
-          />
-        </span>
-        <Text class="main-drawer-item-text">Rate us</Text>
-      </Item>
-      <Item
-        class="main-drawer-item"
-        title="Help"
-        on:click={() => openLink('https://modheader.com/guide/')}
-      >
-        <span class="main-drawer-icon-container">
-          <MdiIcon
-            size="24"
-            class="main-drawer-icon"
-            icon={mdiHelpCircleOutline}
-            color={PRIMARY_COLOR}
-          />
-        </span>
-
-        <Text class="main-drawer-item-text">Help</Text>
-      </Item>
+      <!--
+        Rate us / Help disconnected from modheader.com: that domain belonged to the
+        original project, whose later builds shipped spyware (see README). Point
+        these at this fork's own store listing / docs once they exist.
+        <Item
+          class="main-drawer-item"
+          title="Rate us"
+          on:click={() => openLink('https://modheader.com/review?browser=' + CURRENT_BROWSER)}
+        >
+          <span class="main-drawer-icon-container">
+            <MdiIcon
+              size="24"
+              class="main-drawer-icon"
+              icon={mdiThumbUpOutline}
+              color={PRIMARY_COLOR}
+            />
+          </span>
+          <Text class="main-drawer-item-text">Rate us</Text>
+        </Item>
+        <Item
+          class="main-drawer-item"
+          title="Help"
+          on:click={() => openLink('https://modheader.com/guide/')}
+        >
+          <span class="main-drawer-icon-container">
+            <MdiIcon
+              size="24"
+              class="main-drawer-icon"
+              icon={mdiHelpCircleOutline}
+              color={PRIMARY_COLOR}
+            />
+          </span>
+          <Text class="main-drawer-item-text">Help</Text>
+        </Item>
+      -->
     </List>
   </Content>
 </Drawer>

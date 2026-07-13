@@ -406,12 +406,15 @@ describe('profile', () => {
   });
 
   test('Profile changes are persisted after initialization', () => {
-    const saveToStorageMock = jest.fn();
+    const saveToStorageMock = jest.fn((items, callback) => callback());
     window.chrome = {
-      extension: {
-        getBackgroundPage: () => ({
-          saveToStorage: saveToStorageMock
-        })
+      storage: {
+        local: {
+          set: saveToStorageMock
+        }
+      },
+      runtime: {
+        lastError: undefined
       }
     };
     mockDatasource.profiles.set([
@@ -429,33 +432,39 @@ describe('profile', () => {
       }
     ]);
     expect(saveToStorageMock).toHaveBeenCalledTimes(1);
-    expect(saveToStorageMock).toHaveBeenCalledWith({
-      profiles: [
-        {
-          title: 'Local Profile 1'
-        },
-        {
-          title: 'Local Profile 2'
-        }
-      ],
-      selectedProfile: 0
-    });
+    expect(saveToStorageMock).toHaveBeenCalledWith(
+      {
+        profiles: [
+          {
+            title: 'Local Profile 1'
+          },
+          {
+            title: 'Local Profile 2'
+          }
+        ],
+        selectedProfile: 0
+      },
+      expect.any(Function)
+    );
 
     mockDatasource.selectedProfileIndex.set(1);
 
     jest.clearAllMocks();
     jest.runAllTimers();
     expect(saveToStorageMock).toHaveBeenCalledTimes(1);
-    expect(saveToStorageMock).toHaveBeenCalledWith({
-      profiles: [
-        {
-          title: 'Local Profile 1'
-        },
-        {
-          title: 'Local Profile 2'
-        }
-      ],
-      selectedProfile: 1
-    });
+    expect(saveToStorageMock).toHaveBeenCalledWith(
+      {
+        profiles: [
+          {
+            title: 'Local Profile 1'
+          },
+          {
+            title: 'Local Profile 2'
+          }
+        ],
+        selectedProfile: 1
+      },
+      expect.any(Function)
+    );
   });
 });

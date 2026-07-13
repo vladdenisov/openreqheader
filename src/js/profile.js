@@ -5,6 +5,7 @@ import lodashIsEqual from 'lodash/isEqual.js';
 import lodashIsArray from 'lodash/isArray.js';
 import lodashDebounce from 'lodash/debounce.js';
 import { takeRight } from './utils.js';
+import { setLocal } from './storage.js';
 import { createHeader } from './header.js';
 import { FilterType } from './filter.js';
 import { lightOrDark, generateBackgroundColor, generateTextColor } from './color.js';
@@ -41,20 +42,13 @@ export const buttonColor = derived(
 const debouncedSave = lodashDebounce(save, 500, { leading: true, trailing: true });
 
 export async function save() {
-  try {
-    const background = chrome.extension.getBackgroundPage();
-    await background.saveToStorage({
-      profiles: latestProfiles,
-      selectedProfile: latestSelectedProfileIndex
-    });
-  } catch (err) {
-    // Firefox's private session cannot access background page, so just set
-    // directly to the browser storage.
-    await browser.storage.local.set({
-      profiles: latestProfiles,
-      selectedProfile: latestSelectedProfileIndex
-    });
-  }
+  // No persistent background page under MV3 (service worker only), so this
+  // writes directly to storage instead of routing through the background
+  // context via chrome.extension.getBackgroundPage() (removed, MV2-only).
+  await setLocal({
+    profiles: latestProfiles,
+    selectedProfile: latestSelectedProfileIndex
+  });
 }
 
 function isExistingProfileTitle_(title) {

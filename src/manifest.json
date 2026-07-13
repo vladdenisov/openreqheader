@@ -1,15 +1,19 @@
 {
-  "name": "ModHeader",
+  "name": "OpenReqHeader",
   "version": "4.0.0",
-  "manifest_version": 2,
-  "homepage_url": "https://modheader.com/",
+  "manifest_version": 3,
   "description": "Modify HTTP request and response headers",
   "background": {
-    "scripts": ["js/background.js"]
+    "service_worker": "js/background.js",
+    "type": "module"
   },
-  "browser_action": {
-    "default_icon": "images/icon.png",
-    "default_title": "ModHeader",
+  "action": {
+    "default_icon": {
+      "16": "images/icon_16.png",
+      "48": "images/icon_48.png",
+      "128": "images/icon_128.png"
+    },
+    "default_title": "OpenReqHeader",
     "default_popup": "popup.html"
   },
   "icons": {
@@ -18,12 +22,10 @@
     "128": "images/icon_128.png"
   },
   "incognito": "spanning",
-  "permissions": ["contextMenus", "storage", "webRequest", "webRequestBlocking", "<all_urls>"],
-  "externally_connectable": {
-    "matches": ["*://modheader.com/*"]
-  },
+  "permissions": ["contextMenus", "storage", "webRequest", "declarativeNetRequest"],
+  "host_permissions": ["<all_urls>"],
   "commands": {
-    "_execute_browser_action": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Alt+Shift+H"
       }
@@ -50,6 +52,13 @@
       "description": "Switch to 4th profile"
     }
   },
-  "web_accessible_resources": ["images/icon_bw.png", "app.html"],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "web_accessible_resources": [
+    {
+      "resources": ["images/icon_bw.png", "app.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
 }

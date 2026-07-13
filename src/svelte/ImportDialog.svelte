@@ -14,6 +14,10 @@
   import { showImportDialog } from '../js/dialog.js';
   import { isChromiumBasedBrowser } from '../js/user-agent.js';
 
+  // Disconnected from modheader.com/bewisse.com: those domains belonged to the
+  // original project, whose later builds shipped spyware (see README). These
+  // prefixes are kept only to still recognize old share links a user may have
+  // saved; this fork does not generate new ones (see ExportDialog.svelte).
   const SHARE_URL_PREFIX = 'https://modheader.com/p/';
   const OLD_SHARE_URL_PREFIX = 'https://bewisse.com/modheader/p/';
   let importTextbox;
