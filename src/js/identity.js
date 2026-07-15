@@ -3,11 +3,10 @@ import { removeLocal, setLocal } from './storage.js';
 import {CURRENT_BROWSER} from "./user-agent.js";
 
 export const signedInUser = writable(undefined);
-export const isProUser = derived(
-  [signedInUser],
-  ([$signedInUser]) => $signedInUser && $signedInUser.license === 'pro',
-  false
-);
+// This fork has no account backend (see below): sign-in/upgrade are inert, so a
+// license-based gate would keep every PRO feature permanently locked. Unlock
+// them unconditionally instead of gating on a 'pro' license we can never fetch.
+export const isProUser = derived([signedInUser], () => true, true);
 
 export async function loadSignedInUser() {
   try {

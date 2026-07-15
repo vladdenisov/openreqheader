@@ -1,40 +1,19 @@
 <script>
-  import MdiIcon from './MdiIcon.svelte';
-  import { isProUser } from '../js/identity.js';
-  import { mdiLock } from '@mdi/js';
-  import { showUpgradeDialog } from '../js/dialog.js';
-
+  // This fork has no PRO gating (see identity.js): every feature is unlocked, so
+  // ProFeature just renders its content with no lock overlay or upgrade prompt.
+  // Kept as a thin wrapper so existing call sites keep working unchanged.
   export let requirePro = true;
-
-  function showUpgrade() {
-    showUpgradeDialog.set(true);
-  }
+  requirePro; // referenced to keep the prop; intentionally unused.
 </script>
 
-{#if !requirePro || $isProUser}
-  <div class="pro-feature-container">
-    <slot upgradeRequired={false} />
-  </div>
-{:else}
-  <div class="pro-feature-container" on:click|capture|preventDefault|stopPropagation={showUpgrade}>
-    <slot upgradeRequired={true} />
-    <MdiIcon class="pro-feature-lock" icon={mdiLock} size="12" color="#e6a900" />
-  </div>
-{/if}
+<div class="pro-feature-container">
+  <slot upgradeRequired={false} />
+</div>
 
 <style module>
   .pro-feature-container {
-    cursor: pointer;
     position: relative;
     display: inline-block;
     height: 100%;
-  }
-
-  .pro-feature-lock {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 12px !important;
-    height: 12px !important;
   }
 </style>

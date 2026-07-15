@@ -76,7 +76,17 @@ async function saveStorageToCloud(chromeLocal) {
   if (keys.length === 0 || !lodashIsEqual(items[keys[keys.length - 1]], chromeLocal.profiles)) {
     const data = {};
     data[Date.now()] = chromeLocal.profiles;
-    await setSync(data);
+    try {
+      await setSync(data);
+    } catch (err) {
+      // chrome.storage.sync caps each item at QUOTA_BYTES_PER_ITEM (8 KB). A
+      // profile with large header values (e.g. base64 tokens) blows past that and
+      // rejects with "kQuotaBytesPerItem quota exceeded". The profiles are already
+      // persisted in storage.local, so a failed cloud snapshot is non-fatal: warn
+      // and skip instead of letting the rejection surface as a console error.
+      console.warn('Skipping cloud backup (chrome.storage.sync quota exceeded):', err);
+      return;
+    }
   }
   if (keys.length >= MAX_PROFILES_IN_CLOUD) {
     await removeSync(keys.slice(0, keys.length - MAX_PROFILES_IN_CLOUD));
