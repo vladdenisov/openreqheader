@@ -18,9 +18,33 @@ import { evaluateStaticValue } from './utils.js';
 const EXCLUDE_RULE_PRIORITY = 100;
 const RULE_PRIORITY = 1;
 
+// DNR excludes 'main_frame' (and only main_frame) from a rule when the rule's
+// condition specifies no resourceTypes. That means a catch-all header rule would
+// silently skip top-level page navigations - the request you get when you just
+// open a URL in the address bar. To match the old webRequest engine (which hit
+// every request type), default to the full resource-type list so main_frame is
+// covered unless the profile narrows it with its own resource filters.
+const ALL_RESOURCE_TYPES = [
+  'main_frame',
+  'sub_frame',
+  'stylesheet',
+  'script',
+  'image',
+  'font',
+  'object',
+  'xmlhttprequest',
+  'ping',
+  'csp_report',
+  'media',
+  'websocket',
+  'webtransport',
+  'webbundle',
+  'other'
+];
+
 function unionResourceTypes(resourceFilters) {
   if (!resourceFilters || resourceFilters.length === 0) {
-    return undefined;
+    return ALL_RESOURCE_TYPES;
   }
   const types = new Set();
   for (const filter of resourceFilters) {
@@ -136,13 +160,47 @@ export function buildDnrRules({ chromeLocal, activeProfiles }) {
 }
 
 /**
+ * Adds the given rules, skipping any that Chrome rejects.
+ *
+ * updateSessionRules is atomic: a single invalid rule (e.g. a filter regex that
+ * JS RegExp accepts but DNR's RE2 engine rejects) makes Chrome reject the whole
+ * addRules batch, silently dropping every other profile's headers too. To stay
+ * robust we try the full batch first, and only on failure fall back to adding
+ * rules one at a time so one bad rule can't take down the rest.
+ */
+async function addRulesResiliently(rules) {
+  if (rules.length === 0) {
+    return;
+  }
+  try {
+    await chrome.declarativeNetRequest.updateSessionRules({ addRules: rules });
+    return;
+  } catch (batchErr) {
+    console.warn(
+      'declarativeNetRequest rejected the rule batch; retrying rule-by-rule to ' +
+        'isolate the invalid rule(s):',
+      batchErr
+    );
+  }
+  for (const rule of rules) {
+    try {
+      await chrome.declarativeNetRequest.updateSessionRules({ addRules: [rule] });
+    } catch (ruleErr) {
+      console.error('Skipping invalid declarativeNetRequest rule:', rule, ruleErr);
+    }
+  }
+}
+
+/**
  * Replaces all of this extension's session rules with the freshly built set.
  */
 export async function applyDnrRules({ chromeLocal, activeProfiles }) {
   const rules = buildDnrRules({ chromeLocal, activeProfiles });
   const existing = await chrome.declarativeNetRequest.getSessionRules();
-  await chrome.declarativeNetRequest.updateSessionRules({
-    removeRuleIds: existing.map((rule) => rule.id),
-    addRules: rules
-  });
+  if (existing.length > 0) {
+    await chrome.declarativeNetRequest.updateSessionRules({
+      removeRuleIds: existing.map((rule) => rule.id)
+    });
+  }
+  await addRulesResiliently(rules);
 }
