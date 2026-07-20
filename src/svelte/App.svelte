@@ -48,7 +48,7 @@
     <div class="top-app-bar-container">
       <TopBar />
     </div>
-    <div class={$isPaused ? 'disabled' : ''}>
+    <div class="scroll-content {$isPaused ? 'disabled' : ''}">
       {#if $selectedProfile.headers.length > 0}
         <Headers
           id="request-header"
@@ -166,6 +166,15 @@
 
   .top-app-bar-container {
     height: 48px;
+  }
+
+  /* Chrome caps the popup at 600px tall, so the header/filter list can't grow
+     the window past that. Scroll it inside the remaining height instead of
+     clipping (the top bar stays pinned at 48px). */
+  .scroll-content {
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .extra-gap {
